@@ -78,62 +78,80 @@ https://task-pilot-backend-sigma.vercel.app/
 
 ### 🔐 Authentication
 
-Signup (send OTP) → POST /auth/signup
-Verify signup OTP → POST /auth/verify-signup
-Resend signup OTP → POST /auth/resend-signup-otp
-Login (JWT) → POST /auth/login
-Forgot password OTP → POST /auth/forgot-password
-Verify forgot OTP → POST /auth/verify-forgot-password
-Reset password → POST /auth/reset-password
-Get profile (JWT protected) → GET /profile
+| Method | Endpoint                       | Description                |
+| ------ | ------------------------------ | -------------------------- |
+| POST   | `/auth/signup`                 | Send signup OTP            |
+| POST   | `/auth/verify-signup`          | Verify signup OTP          |
+| POST   | `/auth/resend-signup-otp`      | Resend signup OTP          |
+| POST   | `/auth/login`                  | Login (JWT token)          |
+| POST   | `/auth/forgot-password`        | Send forgot password OTP   |
+| POST   | `/auth/verify-forgot-password` | Verify forgot password OTP |
+| POST   | `/auth/reset-password`         | Reset password             |
+| GET    | `/profile`                     | Get logged-in user profile |
+
 
 ---
 
 ### 👥 Teams
 
-POST /teams
-GET /teams
-POST /teams/:id
-DELETE /teams/:id
-GET /teams/:id/details
-GET /teams/:id/tasks
+| Method | Endpoint             | Description                 |
+| ------ | -------------------- | --------------------------- |
+| POST   | `/teams`             | Create team                 |
+| GET    | `/teams`             | Get all teams               |
+| POST   | `/teams/:id`         | Update team                 |
+| DELETE | `/teams/:id`         | Delete team                 |
+| GET    | `/teams/:id/details` | Get team details            |
+| GET    | `/teams/:id/tasks`   | Get team tasks with filters |
+
 
 ---
 
 ### 🏷 Tags
 
-POST /tags
-GET /tags
-DELETE /tags/:id
+| Method | Endpoint    | Description  |
+| ------ | ----------- | ------------ |
+| POST   | `/tags`     | Create tag   |
+| GET    | `/tags`     | Get all tags |
+| DELETE | `/tags/:id` | Delete tag   |
+
 
 ---
 
 ### 📁 Projects
 
-POST /projects
-GET /projects
-GET /projects/:id
-POST /projects/:id
-DELETE /projects/:id
-GET /projects/:id/tasks
+| Method | Endpoint              | Description       |
+| ------ | --------------------- | ----------------- |
+| POST   | `/projects`           | Create project    |
+| GET    | `/projects`           | Get all projects  |
+| GET    | `/projects/:id`       | Get project by ID |
+| POST   | `/projects/:id`       | Update project    |
+| DELETE | `/projects/:id`       | Delete project    |
+| GET    | `/projects/:id/tasks` | Get project tasks |
+
 
 ---
 
 ### 📝 Tasks
 
-POST /tasks
-GET /tasks
-GET /tasks/:id
-POST /tasks/:id
-DELETE /tasks/:id
+| Method | Endpoint     | Description                       |
+| ------ | ------------ | --------------------------------- |
+| POST   | `/tasks`     | Create task                       |
+| GET    | `/tasks`     | Get all tasks (filters & sorting) |
+| GET    | `/tasks/:id` | Get task by ID                    |
+| POST   | `/tasks/:id` | Update task                       |
+| DELETE | `/tasks/:id` | Delete task                       |
+
 
 ---
 
 ### 📊 Reports
 
-GET /report/last-week
-GET /report/pending
-GET /report/closed-tasks
+| Method | Endpoint               | Description              |
+| ------ | ---------------------- | ------------------------ |
+| GET    | `/report/last-week`    | Completed last week      |
+| GET    | `/report/pending`      | Pending work summary     |
+| GET    | `/report/closed-tasks` | Closed task distribution |
+
 
 ---
 
