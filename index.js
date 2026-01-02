@@ -1272,6 +1272,13 @@ const updateTask = async (taskId, data) => {
   const uniqueOwners = [...new Set(owners.map(String))];
   const uniqueTags = tags ? [...new Set(tags.map(String))] : [];
 
+    let completedAtUpdate = null;
+
+  if (status === "Completed") {
+    completedAtUpdate = new Date();
+  }
+
+
   const updatedTask = await Task.findByIdAndUpdate(
     taskId,
     {
@@ -1282,7 +1289,9 @@ const updateTask = async (taskId, data) => {
       tags: uniqueTags,
       timeToComplete,
       status,
-      priority
+      priority,
+      completedAt: completedAtUpdate,
+
     },
     { new: true }
   );
@@ -1334,12 +1343,12 @@ const getLastWeekCompletedTasks = async () => {
 
   const tasks = await Task.find({
     status: "Completed",
-    updatedAt: { $gte: sevenDaysAgo }
-  })
-  .populate("project team owners");
+    completedAt: { $gte: sevenDaysAgo }
+  }).populate("project team owners");
 
   return { totalCompleted: tasks.length, tasks };
 };
+
 
 
 app.get("/report/last-week", authMiddleware, async (req, res) => {
