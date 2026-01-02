@@ -157,13 +157,23 @@ https://task-pilot-backend-sigma.vercel.app/
 
 ## 🛠 Tech Stack
 
-Node.js
-Express.js
-MongoDB (Mongoose)
-JWT Authentication
-Email OTP Verification
-Nodemailer
-Bcrypt
+### Backend
+- Node.js  
+- Express.js  
+
+### Database
+- MongoDB (Mongoose)
+
+### Authentication & Security
+- JWT (JSON Web Token) Authentication  
+- Email OTP Verification System  
+- Bcrypt Password Hashing  
+
+### Email & Notifications
+- Nodemailer (Gmail SMTP)
+
+### Deployment
+- Vercel (Backend Hosting)
 
 ---
 
