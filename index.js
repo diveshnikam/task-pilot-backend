@@ -103,6 +103,26 @@ const validateTeamName = (name) => {
 };
 
 
+// OTP EXPIRY CHECKER
+
+
+app.get("/auth/otp-expiry", async (req, res) => {
+  const { email } = req.query;
+
+  const record = await SignupVerification.findOne({ email });
+  if (!record) return res.status(404).json({ error: "OTP expired" });
+
+  res.json({ expiresAt: record.expiresAt });
+});
+
+app.get("/auth/forgot-otp-expiry", async (req, res) => {
+  const { email } = req.query;
+
+  const record = await ForgotPasswordVerification.findOne({ email });
+  if (!record) return res.status(404).json({ error: "OTP expired" });
+
+  res.json({ expiresAt: record.expiresAt });
+});
 
 
 
