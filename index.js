@@ -232,50 +232,25 @@ app.post("/auth/verify-signup", async (req, res) => {
 
 app.post("/auth/resend-signup-otp", async (req, res) => {
   try {
-    let { email, password } = req.body;
-
-    if (!email || !password) {
-      throw new Error("Email and password are required");
-    }
+    let { email } = req.body;
+    if (!email) throw new Error("Email is required");
 
     email = email.toLowerCase();
 
-    if (!emailRegex.test(email)) {
-      throw new Error("Invalid email address");
-    }
-
-    if (!passwordRegex.test(password)) {
-      throw new Error(
-        "Password must have at least 1 uppercase, 1 number, 1 special character and minimum 8 characters"
-      );
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new Error("User already registered. Please login.");
-    }
-
     const record = await SignupVerification.findOne({ email });
+    if (!record) throw new Error("OTP expired. Please signup again.");
 
-    if (!record) {
-      throw new Error("OTP expired. Please sign up again.");
-    }
-
-    if (record.expiresAt < new Date()) {
-      await SignupVerification.deleteOne({ email });
-      throw new Error("OTP expired. Please sign up again.");
-    }
-
-    const isMatch = await bcrypt.compare(password, record.passwordHash);
-    if (!isMatch) {
-      throw new Error("Incorrect password");
+    
+    const secondsPassed = (Date.now() - new Date(record.updatedAt)) / 1000;
+    if (secondsPassed < 60) {
+      throw new Error(`Please wait ${Math.ceil(60 - secondsPassed)} seconds`);
     }
 
     const otp = generateOTP();
 
     record.otp = otp;
     record.expiresAt = new Date(Date.now() + 3 * 60 * 1000);
-    await record.save();
+    await record.save(); 
 
     await sendEmail({
       to: email,
@@ -283,7 +258,7 @@ app.post("/auth/resend-signup-otp", async (req, res) => {
       text: `Your new OTP is ${otp}. It is valid for 3 minutes.`,
     });
 
-    res.status(200).json({ message: "OTP sent successfully" });
+    res.json({ message: "OTP sent successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -424,29 +399,24 @@ app.post("/auth/forgot-password", async (req, res) => {
 app.post("/auth/resend-forgot-password-otp", async (req, res) => {
   try {
     let { email } = req.body;
-
-    if (!email) {
-      throw new Error("Email is required");
-    }
+    if (!email) throw new Error("Email is required");
 
     email = email.toLowerCase();
 
     const record = await ForgotPasswordVerification.findOne({ email });
+    if (!record) throw new Error("OTP expired. Please start again.");
 
-    if (!record) {
-      throw new Error("OTP expired. Please try again.");
-    }
-
-    if (record.expiresAt < new Date()) {
-      await ForgotPasswordVerification.deleteOne({ email });
-      throw new Error("OTP expired. Please try again.");
+    
+    const secondsPassed = (Date.now() - new Date(record.updatedAt)) / 1000;
+    if (secondsPassed < 60) {
+      throw new Error(`Please wait ${Math.ceil(60 - secondsPassed)} seconds`);
     }
 
     const otp = generateOTP();
 
     record.otp = otp;
     record.expiresAt = new Date(Date.now() + 3 * 60 * 1000);
-    await record.save();
+    await record.save(); 
 
     await sendEmail({
       to: email,
@@ -454,11 +424,12 @@ app.post("/auth/resend-forgot-password-otp", async (req, res) => {
       text: `Your new OTP is ${otp}. It is valid for 3 minutes.`,
     });
 
-    res.status(200).json({ message: "OTP resent successfully" });
+    res.json({ message: "OTP resent successfully" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
+
 
 //Forgot Password - Verify OTP
 
