@@ -467,34 +467,29 @@ app.post("/auth/verify-forgot-password", async (req, res) => {
 app.post("/auth/reset-password", async (req, res) => {
   try {
     let { email, newPassword } = req.body;
-
-    if (!email || !newPassword) {
-      throw new Error("Email and new password are required");
-    }
+    if (!email || !newPassword) throw new Error("Email and new password are required");
 
     email = email.toLowerCase();
 
-    if (!passwordRegex.test(newPassword)) {
-      throw new Error(
-        "Password must have at least 1 uppercase, 1 number, 1 special character and minimum 8 characters"
-      );
-    }
+    if (!passwordRegex.test(newPassword))
+      throw new Error("Password must have at least 1 uppercase, 1 number, 1 special character and minimum 8 characters");
+
+    
+    const otpRecord = await ForgotPasswordVerification.findOne({ email });
+    if (!otpRecord || otpRecord.expiresAt < new Date())
+      throw new Error("OTP expired. Please restart forgot password process.");
 
     const user = await User.findOne({ email });
-    if (!user) {
-      throw new Error("User not found");
-    }
+    if (!user) throw new Error("User not found");
 
     user.password = newPassword;
     await user.save();
 
     await ForgotPasswordVerification.deleteOne({ email });
 
-    res.status(200).json({
-      message: "Password reset successful. Please login again.",
-    });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
