@@ -325,19 +325,24 @@ const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new Error("Unauthorized");
+      return res.status(401).json({ error: "No token provided" });
     }
 
     const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.userId = decoded.userId;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        return res.status(401).json({ error: "Session expired. Please login again." });
+      }
 
-    next();
-  } catch (error) {
-    res.status(401).json({ error: error.message });
+      req.userId = decoded.userId;
+      next();
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Auth middleware failed" });
   }
 };
+
 
 app.get("/profile", authMiddleware, async (req, res) => {
   const user = await User.findById(req.userId);
