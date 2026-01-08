@@ -673,6 +673,21 @@ app.get("/teams", authMiddleware, async (req, res) => {
   }
 });
 
+//get all users
+
+const getAllUsers = async () => { 
+  return await User.find().sort({ name: 1 });
+};
+
+app.get("/users", authMiddleware, async (req, res) => { 
+  try {
+    const users = await getAllUsers();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 //get team details by id
 
 const getTeamDetailsOnly = async (teamId) => {
