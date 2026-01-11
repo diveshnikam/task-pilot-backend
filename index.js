@@ -9,7 +9,6 @@ const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
-
 // CORS SETUP
 
 const corsOptions = {
@@ -30,10 +29,10 @@ initDatabse();
 
 const User = require("./models/users");
 const ForgotPasswordVerification = require("./models/forgotPasswordVerificationSchema");
-const Team = require("./models/team")
-const Tag = require("./models/tag")
-const Project = require("./models/project")
-const Task = require("./models/task")
+const Team = require("./models/team");
+const Tag = require("./models/tag");
+const Project = require("./models/project");
+const Task = require("./models/task");
 
 const SignupVerification = require("./models/signupVerificationSchema");
 
@@ -75,12 +74,9 @@ const sendEmail = async ({ to, subject, text }) => {
 const generateOTP = () =>
   Math.floor(100000 + Math.random() * 900000).toString();
 
-
-
 // VALID OBJECT ID CHECKER
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
-
 
 // TEAM NAME VALIDATOR
 
@@ -102,9 +98,7 @@ const validateTeamName = (name) => {
   return null;
 };
 
-
 // OTP EXPIRY CHECKER
-
 
 app.get("/auth/otp-expiry", async (req, res) => {
   const { email } = req.query;
@@ -123,10 +117,6 @@ app.get("/auth/forgot-otp-expiry", async (req, res) => {
 
   res.json({ expiresAt: record.expiresAt });
 });
-
-
-
-
 
 // SIGNUP SEND OTP
 
@@ -240,7 +230,6 @@ app.post("/auth/resend-signup-otp", async (req, res) => {
     const record = await SignupVerification.findOne({ email });
     if (!record) throw new Error("OTP expired. Please signup again.");
 
-    
     const secondsPassed = (Date.now() - new Date(record.updatedAt)) / 1000;
     if (secondsPassed < 60) {
       throw new Error(`Please wait ${Math.ceil(60 - secondsPassed)} seconds`);
@@ -250,7 +239,7 @@ app.post("/auth/resend-signup-otp", async (req, res) => {
 
     record.otp = otp;
     record.expiresAt = new Date(Date.now() + 3 * 60 * 1000);
-    await record.save(); 
+    await record.save();
 
     await sendEmail({
       to: email,
@@ -332,7 +321,9 @@ const authMiddleware = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        return res.status(401).json({ error: "Session expired. Please login again." });
+        return res
+          .status(401)
+          .json({ error: "Session expired. Please login again." });
       }
 
       req.userId = decoded.userId;
@@ -343,15 +334,12 @@ const authMiddleware = (req, res, next) => {
   }
 };
 
-
 app.get("/profile", authMiddleware, async (req, res) => {
   const user = await User.findById(req.userId);
   res.json(user);
 });
 
-
 //Forgot Password - Send OTP
-
 
 const sendForgotPasswordOTP = async ({ email }) => {
   if (!email) {
@@ -386,7 +374,6 @@ const sendForgotPasswordOTP = async ({ email }) => {
   });
 };
 
-
 app.post("/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -411,7 +398,6 @@ app.post("/auth/resend-forgot-password-otp", async (req, res) => {
     const record = await ForgotPasswordVerification.findOne({ email });
     if (!record) throw new Error("OTP expired. Please start again.");
 
-    
     const secondsPassed = (Date.now() - new Date(record.updatedAt)) / 1000;
     if (secondsPassed < 60) {
       throw new Error(`Please wait ${Math.ceil(60 - secondsPassed)} seconds`);
@@ -421,7 +407,7 @@ app.post("/auth/resend-forgot-password-otp", async (req, res) => {
 
     record.otp = otp;
     record.expiresAt = new Date(Date.now() + 3 * 60 * 1000);
-    await record.save(); 
+    await record.save();
 
     await sendEmail({
       to: email,
@@ -434,7 +420,6 @@ app.post("/auth/resend-forgot-password-otp", async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 //Forgot Password - Verify OTP
 
@@ -466,20 +451,21 @@ app.post("/auth/verify-forgot-password", async (req, res) => {
   }
 });
 
-
 //Forgot Password - Reset Password
 
 app.post("/auth/reset-password", async (req, res) => {
   try {
     let { email, newPassword } = req.body;
-    if (!email || !newPassword) throw new Error("Email and new password are required");
+    if (!email || !newPassword)
+      throw new Error("Email and new password are required");
 
     email = email.toLowerCase();
 
     if (!passwordRegex.test(newPassword))
-      throw new Error("Password must have at least 1 uppercase, 1 number, 1 special character and minimum 8 characters");
+      throw new Error(
+        "Password must have at least 1 uppercase, 1 number, 1 special character and minimum 8 characters"
+      );
 
-    
     const otpRecord = await ForgotPasswordVerification.findOne({ email });
     if (!otpRecord || otpRecord.expiresAt < new Date())
       throw new Error("OTP expired. Please restart forgot password process.");
@@ -498,27 +484,23 @@ app.post("/auth/reset-password", async (req, res) => {
   }
 });
 
-
-//Create Team 
+//Create Team
 
 const createTeam = async (name, description) => {
   try {
-    
     const nameError = validateTeamName(name);
     if (nameError) {
       throw new Error(nameError);
     }
 
-    
     const existingTeam = await Team.findOne({ name: name.trim() });
     if (existingTeam) {
       throw new Error("Team already exists");
     }
 
-   
     const newTeam = new Team({
       name: name.trim(),
-      description: description ? description.trim() : undefined
+      description: description ? description.trim() : undefined,
     });
 
     return await newTeam.save();
@@ -537,22 +519,19 @@ app.post("/teams", authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       error: "Failed to create team",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
-
 
 //Update Team
 
 const updateTeam = async (id, name, description) => {
   try {
-   
     if (!isValidObjectId(id)) {
       throw new Error("Invalid Team ID");
     }
 
-    
     const team = await Team.findById(id);
     if (!team) {
       throw new Error("Team not found");
@@ -560,17 +539,15 @@ const updateTeam = async (id, name, description) => {
 
     const updateData = {};
 
-    
     if (name !== undefined) {
       const nameError = validateTeamName(name);
       if (nameError) {
         throw new Error(nameError);
       }
 
-      
       const duplicateTeam = await Team.findOne({
-        name: name.trim(),
-        _id: { $ne: id }
+        name: { $regex: `^${name.trim()}$`, $options: "i" },
+        _id: { $ne: id },
       });
 
       if (duplicateTeam) {
@@ -580,24 +557,21 @@ const updateTeam = async (id, name, description) => {
       updateData.name = name.trim();
     }
 
-   
     if (description !== undefined) {
       const desc = description.trim();
       updateData.description = desc ? desc : undefined;
     }
 
-    const updatedTeam = await Team.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const updatedTeam = await Team.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     return updatedTeam;
   } catch (error) {
     throw error;
   }
 };
-
 
 app.post("/teams/:id", authMiddleware, async (req, res) => {
   try {
@@ -610,28 +584,24 @@ app.post("/teams/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       error: "Failed to update team",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
-
 
 //Delete Team
 
 const deleteTeam = async (id) => {
   try {
-    
     if (!isValidObjectId(id)) {
       throw new Error("Invalid Team ID");
     }
 
-   
     const team = await Team.findById(id);
     if (!team) {
       throw new Error("Team not found");
     }
 
-   
     await Team.findByIdAndDelete(id);
 
     return true;
@@ -647,22 +617,21 @@ app.delete("/teams/:id", authMiddleware, async (req, res) => {
     await deleteTeam(id);
 
     res.status(200).json({
-      message: "Team deleted successfully"
+      message: "Team deleted successfully",
     });
   } catch (error) {
     res.status(400).json({
       error: "Failed to delete team",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
 
-//get all teams 
+//get all teams
 
 const getAllTeams = async () => {
   return await Team.find().sort({ name: 1 });
 };
-
 
 app.get("/teams", authMiddleware, async (req, res) => {
   try {
@@ -675,11 +644,11 @@ app.get("/teams", authMiddleware, async (req, res) => {
 
 //get all users
 
-const getAllUsers = async () => { 
+const getAllUsers = async () => {
   return await User.find().sort({ name: 1 });
 };
 
-app.get("/users", authMiddleware, async (req, res) => { 
+app.get("/users", authMiddleware, async (req, res) => {
   try {
     const users = await getAllUsers();
     res.json(users);
@@ -721,7 +690,8 @@ const getTeamTasks = async (teamId, query) => {
 
   if (query.project) {
     if (!isValidObjectId(query.project)) throw new Error("Invalid Project ID");
-    if (!(await Project.findById(query.project))) throw new Error("Project not found");
+    if (!(await Project.findById(query.project)))
+      throw new Error("Project not found");
     filter.project = query.project;
   }
 
@@ -745,9 +715,6 @@ const getTeamTasks = async (teamId, query) => {
   return { totalTasks: tasks.length, tasks };
 };
 
-
-
-
 app.get("/teams/:id/tasks", authMiddleware, async (req, res) => {
   try {
     const data = await getTeamTasks(req.params.id, req.query);
@@ -756,9 +723,6 @@ app.get("/teams/:id/tasks", authMiddleware, async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
-
-
 
 // tag name validator\
 
@@ -781,7 +745,6 @@ const createTag = async (name) => {
   const tag = new Tag({ name: name.trim() });
   return await tag.save();
 };
-
 
 app.post("/tags", authMiddleware, async (req, res) => {
   try {
@@ -806,11 +769,11 @@ const getAllTags = async () => {
 app.get("/tags", authMiddleware, async (req, res) => {
   try {
     const tags = await getAllTags();
-    res.json(tags);  
+    res.json(tags);
   } catch (error) {
     res.status(500).json({
       error: "Failed to fetch tags",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
@@ -835,7 +798,6 @@ const deleteTag = async (id) => {
   }
 };
 
-
 app.delete("/tags/:id", authMiddleware, async (req, res) => {
   try {
     await deleteTag(req.params.id);
@@ -843,11 +805,10 @@ app.delete("/tags/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(400).json({
       error: "Failed to delete tag",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
-
 
 //project name validator
 
@@ -856,10 +817,10 @@ const projectNameRegex = /^[A-Za-z0-9 _-]+$/;
 const validateProjectName = (name) => {
   if (!name || name.trim() === "") return "Project name is required";
   if (!projectNameRegex.test(name)) return "Invalid characters in project name";
-  if (name.trim().length < 2) return "Project name must be at least 2 characters";
+  if (name.trim().length < 2)
+    return "Project name must be at least 2 characters";
   return null;
 };
-
 
 //create Project
 
@@ -872,7 +833,7 @@ const createProject = async (name, description) => {
 
   const project = new Project({
     name: name.trim(),
-    description: description ? description.trim() : undefined
+    description: description ? description.trim() : undefined,
   });
 
   return await project.save();
@@ -902,25 +863,26 @@ const updateProject = async (id, name, description) => {
     const err = validateProjectName(name);
     if (err) throw new Error(err);
 
-    const duplicate = await Project.findOne({
-      name: name.trim(),
-      _id: { $ne: id }
+    const exists = await Project.findOne({
+      name: { $regex: `^${name.trim()}$`, $options: "i" },
+      _id: { $ne: id },
     });
-    if (duplicate) throw new Error("Project name already exists");
+
+    if (exists) throw new Error("Project name already exists");
 
     updateData.name = name.trim();
   }
 
   if (description !== undefined) {
-    updateData.description = description.trim() || undefined;
+    updateData.description =
+      description.trim() === "" ? null : description.trim();
   }
 
   return await Project.findByIdAndUpdate(id, updateData, {
     new: true,
-    runValidators: true
+    runValidators: true,
   });
 };
-
 
 app.post("/projects/:id", authMiddleware, async (req, res) => {
   try {
@@ -949,7 +911,6 @@ const deleteProject = async (id) => {
   return true;
 };
 
-
 app.delete("/projects/:id", authMiddleware, async (req, res) => {
   try {
     await deleteProject(req.params.id);
@@ -969,7 +930,6 @@ const getAllProjects = async () => {
   }
 };
 
-
 app.get("/projects", authMiddleware, async (req, res) => {
   try {
     const projects = await getAllProjects();
@@ -977,11 +937,10 @@ app.get("/projects", authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: "Failed to fetch projects",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
-
 
 //get project by id
 
@@ -994,7 +953,6 @@ const getProjectById = async (id) => {
   return project;
 };
 
-
 app.get("/projects/:id", authMiddleware, async (req, res) => {
   try {
     const project = await getProjectById(req.params.id);
@@ -1002,7 +960,7 @@ app.get("/projects/:id", authMiddleware, async (req, res) => {
   } catch (error) {
     res.status(404).json({
       error: "Failed to fetch project",
-      errorMessage: error.message
+      errorMessage: error.message,
     });
   }
 });
@@ -1011,7 +969,8 @@ app.get("/projects/:id", authMiddleware, async (req, res) => {
 
 const getProjectTasks = async (projectId, query) => {
   if (!isValidObjectId(projectId)) throw new Error("Invalid Project ID");
-  if (!(await Project.findById(projectId))) throw new Error("Project not found");
+  if (!(await Project.findById(projectId)))
+    throw new Error("Project not found");
 
   const filter = { project: projectId };
 
@@ -1044,7 +1003,6 @@ const getProjectTasks = async (projectId, query) => {
   return { totalTasks: tasks.length, tasks };
 };
 
-
 app.get("/projects/:id/tasks", authMiddleware, async (req, res) => {
   try {
     const data = await getProjectTasks(req.params.id, req.query);
@@ -1053,7 +1011,6 @@ app.get("/projects/:id/tasks", authMiddleware, async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 });
-
 
 // Task Name Validator
 const taskNameRegex = /^[A-Za-z0-9 ._-]+$/;
@@ -1066,8 +1023,10 @@ const validateTaskName = (name) => {
 
 // Time Validator
 const validateTimeToComplete = (value) => {
-  if (value === undefined || value === null) return "Time to complete is required";
-  if (!Number.isInteger(value)) return "Time to complete must be a whole number";
+  if (value === undefined || value === null)
+    return "Time to complete is required";
+  if (!Number.isInteger(value))
+    return "Time to complete must be a whole number";
   if (value < 1) return "Time to complete must be at least 1 day";
   return null;
 };
@@ -1088,11 +1047,19 @@ const validatePriority = (priority) => {
   return null;
 };
 
-
-// create task 
+// create task
 
 const createTask = async (data) => {
-  const { name, project, team, owners, tags, timeToComplete, status, priority } = data;
+  const {
+    name,
+    project,
+    team,
+    owners,
+    tags,
+    timeToComplete,
+    status,
+    priority,
+  } = data;
 
   const nameErr = validateTaskName(name);
   if (nameErr) throw new Error(nameErr);
@@ -1135,7 +1102,7 @@ const createTask = async (data) => {
     tags: uniqueTags,
     timeToComplete,
     status,
-    priority
+    priority,
   });
 
   return await task.save();
@@ -1150,7 +1117,7 @@ app.post("/tasks", authMiddleware, async (req, res) => {
   }
 });
 
-//get all tasks 
+//get all tasks
 
 const getAllTasks = async (query) => {
   const filter = {};
@@ -1162,7 +1129,10 @@ const getAllTasks = async (query) => {
   }
 
   if (query.project) {
-    if (!isValidObjectId(query.project) || !(await Project.findById(query.project)))
+    if (
+      !isValidObjectId(query.project) ||
+      !(await Project.findById(query.project))
+    )
       throw new Error("Invalid Project ID");
     filter.project = query.project;
   }
@@ -1188,7 +1158,6 @@ const getAllTasks = async (query) => {
     throw new Error(`Invalid sort value. Allowed: ${allowedSorts.join(", ")}`);
   }
 
-  
   const sort = {};
   if (query.sort === "recent") sort.createdAt = -1;
   if (query.sort === "priority") sort.priority = -1;
@@ -1199,7 +1168,6 @@ const getAllTasks = async (query) => {
 
   return { totalTasks: tasks.length, tasks };
 };
-
 
 app.get("/tasks", authMiddleware, async (req, res) => {
   try {
@@ -1213,8 +1181,7 @@ app.get("/tasks", authMiddleware, async (req, res) => {
 //get task by id
 
 const getTaskById = async (taskId) => {
-  if (!isValidObjectId(taskId))
-    throw new Error("Invalid Task ID");
+  if (!isValidObjectId(taskId)) throw new Error("Invalid Task ID");
 
   const task = await Task.findById(taskId)
     .populate("project")
@@ -1226,7 +1193,6 @@ const getTaskById = async (taskId) => {
 
   return task;
 };
-
 
 app.get("/tasks/:id", authMiddleware, async (req, res) => {
   try {
@@ -1240,7 +1206,16 @@ app.get("/tasks/:id", authMiddleware, async (req, res) => {
 // update task
 
 const updateTask = async (taskId, data) => {
-  const { name, project, team, owners, tags, timeToComplete, status, priority } = data;
+  const {
+    name,
+    project,
+    team,
+    owners,
+    tags,
+    timeToComplete,
+    status,
+    priority,
+  } = data;
 
   const nameErr = validateTaskName(name);
   if (nameErr) throw new Error(nameErr);
@@ -1254,8 +1229,7 @@ const updateTask = async (taskId, data) => {
   const priorityErr = validatePriority(priority);
   if (priorityErr) throw new Error(priorityErr);
 
-  if (!isValidObjectId(taskId))
-    throw new Error("Invalid Task ID");
+  if (!isValidObjectId(taskId)) throw new Error("Invalid Task ID");
 
   if (!isValidObjectId(project) || !(await Project.findById(project)))
     throw new Error("Invalid Project ID");
@@ -1278,12 +1252,11 @@ const updateTask = async (taskId, data) => {
   const uniqueOwners = [...new Set(owners.map(String))];
   const uniqueTags = tags ? [...new Set(tags.map(String))] : [];
 
-    let completedAtUpdate = null;
+  let completedAtUpdate = null;
 
   if (status === "Completed") {
     completedAtUpdate = new Date();
   }
-
 
   const updatedTask = await Task.findByIdAndUpdate(
     taskId,
@@ -1297,7 +1270,6 @@ const updateTask = async (taskId, data) => {
       status,
       priority,
       completedAt: completedAtUpdate,
-
     },
     { new: true }
   );
@@ -1306,7 +1278,6 @@ const updateTask = async (taskId, data) => {
 
   return updatedTask;
 };
-
 
 app.post("/tasks/:id", authMiddleware, async (req, res) => {
   try {
@@ -1320,8 +1291,7 @@ app.post("/tasks/:id", authMiddleware, async (req, res) => {
 //delete task
 
 const deleteTask = async (taskId) => {
-  if (!isValidObjectId(taskId))
-    throw new Error("Invalid Task ID");
+  if (!isValidObjectId(taskId)) throw new Error("Invalid Task ID");
 
   const task = await Task.findById(taskId);
   if (!task) throw new Error("Task not found");
@@ -1329,7 +1299,6 @@ const deleteTask = async (taskId) => {
   await Task.findByIdAndDelete(taskId);
   return true;
 };
-
 
 app.delete("/tasks/:id", authMiddleware, async (req, res) => {
   try {
@@ -1340,7 +1309,6 @@ app.delete("/tasks/:id", authMiddleware, async (req, res) => {
   }
 });
 
-
 // Tasks Completed Last Week
 
 const getLastWeekCompletedTasks = async () => {
@@ -1349,13 +1317,11 @@ const getLastWeekCompletedTasks = async () => {
 
   const tasks = await Task.find({
     status: "Completed",
-    completedAt: { $gte: sevenDaysAgo }
+    completedAt: { $gte: sevenDaysAgo },
   }).populate("project team owners");
 
   return { totalCompleted: tasks.length, tasks };
 };
-
-
 
 app.get("/report/last-week", authMiddleware, async (req, res) => {
   try {
@@ -1365,7 +1331,6 @@ app.get("/report/last-week", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch last week report" });
   }
 });
-
 
 //pending work report
 
@@ -1388,10 +1353,9 @@ const getPendingWorkReport = async () => {
 
   return {
     totalPendingTasks: tasks.length,
-    totalPendingDays
+    totalPendingDays,
   };
 };
-
 
 app.get("/report/pending", authMiddleware, async (req, res) => {
   try {
@@ -1401,7 +1365,6 @@ app.get("/report/pending", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch pending work report" });
   }
 });
-
 
 // closed tasks report
 
@@ -1416,16 +1379,12 @@ const getClosedTasksReport = async () => {
   const byProject = {};
 
   for (let task of tasks) {
-
-    
     const teamName = task.team.name;
     byTeam[teamName] = (byTeam[teamName] || 0) + 1;
 
-   
     const projectName = task.project.name;
     byProject[projectName] = (byProject[projectName] || 0) + 1;
 
-    
     for (let owner of task.owners) {
       const ownerName = owner.name;
       byOwner[ownerName] = (byOwner[ownerName] || 0) + 1;
@@ -1434,7 +1393,6 @@ const getClosedTasksReport = async () => {
 
   return { byTeam, byOwner, byProject };
 };
-
 
 app.get("/report/closed-tasks", authMiddleware, async (req, res) => {
   try {
@@ -1445,35 +1403,9 @@ app.get("/report/closed-tasks", authMiddleware, async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // START SERVER
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
