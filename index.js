@@ -495,7 +495,7 @@ const createTeam = async (name, description) => {
 
     const duplicateTeam = await Team.findOne({
       name: { $regex: `^${name.trim()}$`, $options: "i" },
-      _id: { $ne: id },
+      
     });
 
     if (duplicateTeam) {
@@ -834,7 +834,7 @@ const createProject = async (name, description) => {
 
   const exists = await Project.findOne({
       name: { $regex: `^${name.trim()}$`, $options: "i" },
-      _id: { $ne: id },
+  
     });
 
     if (exists) throw new Error("Project name already exists");
