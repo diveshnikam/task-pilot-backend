@@ -493,9 +493,13 @@ const createTeam = async (name, description) => {
       throw new Error(nameError);
     }
 
-    const existingTeam = await Team.findOne({ name: name.trim() });
-    if (existingTeam) {
-      throw new Error("Team already exists");
+    const duplicateTeam = await Team.findOne({
+      name: { $regex: `^${name.trim()}$`, $options: "i" },
+      _id: { $ne: id },
+    });
+
+    if (duplicateTeam) {
+      throw new Error("Team name already exists");
     }
 
     const newTeam = new Team({
@@ -558,8 +562,8 @@ const updateTeam = async (id, name, description) => {
     }
 
     if (description !== undefined) {
-      const desc = description.trim();
-      updateData.description = desc ? desc : undefined;
+      updateData.description =
+        description.trim() === "" ? null : description.trim();
     }
 
     const updatedTeam = await Team.findByIdAndUpdate(id, updateData, {
@@ -828,8 +832,12 @@ const createProject = async (name, description) => {
   const error = validateProjectName(name);
   if (error) throw new Error(error);
 
-  const exists = await Project.findOne({ name: name.trim() });
-  if (exists) throw new Error("Project already exists");
+  const exists = await Project.findOne({
+      name: { $regex: `^${name.trim()}$`, $options: "i" },
+      _id: { $ne: id },
+    });
+
+    if (exists) throw new Error("Project name already exists");
 
   const project = new Project({
     name: name.trim(),
