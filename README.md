@@ -1,10 +1,6 @@
-
----
-
 # TaskPilot – Backend (Express + MongoDB)
 
-This is the backend API for the **TaskPilot Task Management App**.
-It provides **JWT-based authentication**, **email OTP verification**, secure password recovery, team/project/task management, tagging, advanced filters, and productivity reports.
+This is the backend API for the **TaskPilot Task Management App**. It provides JWT-based authentication, email OTP verification, secure password recovery, team/project/task management, tagging, advanced filters, and productivity reports.
 
 ---
 
@@ -37,6 +33,8 @@ npm install
 cp .env.example .env
 ```
 
+Configure environment variables:
+
 ```
 MONGODB=your_mongodb_uri
 JWT_SECRET=your_secret_key
@@ -45,22 +43,36 @@ EMAIL_PASS=your_email_password
 PORT=3000
 ```
 
+Run the server:
+
 ```bash
 node index.js
 # or
 npx nodemon index.js
 ```
 
-Server:
+---
+
+## 🌍 Server URLs
+
+### Local
 
 ```
 http://localhost:3000
 ```
 
-Hosted:
+### Hosted (Production)
+
+**Core APIs (Render):**
 
 ```
-https://task-pilot-backend-sigma.vercel.app/
+https://task-pilot-backend-5sb3.onrender.com
+```
+
+**OTP / Email APIs (Vercel):**
+
+```
+https://task-pilot-backend-sigma.vercel.app
 ```
 
 ---
@@ -69,7 +81,7 @@ https://task-pilot-backend-sigma.vercel.app/
 
 • Email OTP verification for signup
 • JWT token generation on login
-• Token protected routes (Authorization: Bearer <token>)
+• Token-protected routes (`Authorization: Bearer <token>`)
 • Forgot password with OTP email reset
 
 ---
@@ -78,104 +90,103 @@ https://task-pilot-backend-sigma.vercel.app/
 
 ### 🔐 Authentication
 
-| Method | Endpoint                       | Description                |
-| ------ | ------------------------------ | -------------------------- |
-| POST   | `/auth/signup`                 | Send signup OTP            |
-| POST   | `/auth/verify-signup`          | Verify signup OTP          |
-| POST   | `/auth/resend-signup-otp`      | Resend signup OTP          |
-| POST   | `/auth/login`                  | Login (JWT token)          |
-| POST   | `/auth/forgot-password`        | Send forgot password OTP   |
-| POST   | `/auth/verify-forgot-password` | Verify forgot password OTP |
-| POST   | `/auth/reset-password`         | Reset password             |
-| GET    | `/profile`                     | Get logged-in user profile |
-
+| Method | Endpoint                       | Description                | Hosted On  |
+| ------ | ------------------------------ | -------------------------- | ---------- |
+| POST   | `/auth/signup`                 | Send signup OTP            | **Vercel** |
+| POST   | `/auth/verify-signup`          | Verify signup OTP          | **Vercel** |
+| POST   | `/auth/resend-signup-otp`      | Resend signup OTP          | **Vercel** |
+| POST   | `/auth/forgot-password`        | Send forgot password OTP   | **Vercel** |
+| POST   | `/auth/verify-forgot-password` | Verify forgot password OTP | **Vercel** |
+| POST   | `/auth/reset-password`         | Reset password             | **Vercel** |
+| POST   | `/auth/login`                  | Login (JWT token)          | **Render** |
+| GET    | `/profile`                     | Get logged-in user profile | **Render** |
 
 ---
 
 ### 👥 Teams
 
-| Method | Endpoint             | Description                 |
-| ------ | -------------------- | --------------------------- |
-| POST   | `/teams`             | Create team                 |
-| GET    | `/teams`             | Get all teams               |
-| POST   | `/teams/:id`         | Update team                 |
-| DELETE | `/teams/:id`         | Delete team                 |
-| GET    | `/teams/:id/details` | Get team details            |
-| GET    | `/teams/:id/tasks`   | Get team tasks with filters |
-
+| Method | Endpoint             | Description                 | Hosted On |
+| ------ | -------------------- | --------------------------- | --------- |
+| POST   | `/teams`             | Create team                 | Render    |
+| GET    | `/teams`             | Get all teams               | Render    |
+| POST   | `/teams/:id`         | Update team                 | Render    |
+| DELETE | `/teams/:id`         | Delete team                 | Render    |
+| GET    | `/teams/:id/details` | Get team details            | Render    |
+| GET    | `/teams/:id/tasks`   | Get team tasks with filters | Render    |
 
 ---
 
 ### 🏷 Tags
 
-| Method | Endpoint    | Description  |
-| ------ | ----------- | ------------ |
-| POST   | `/tags`     | Create tag   |
-| GET    | `/tags`     | Get all tags |
-| DELETE | `/tags/:id` | Delete tag   |
-
+| Method | Endpoint    | Description  | Hosted On |
+| ------ | ----------- | ------------ | --------- |
+| POST   | `/tags`     | Create tag   | Render    |
+| GET    | `/tags`     | Get all tags | Render    |
+| DELETE | `/tags/:id` | Delete tag   | Render    |
 
 ---
 
 ### 📁 Projects
 
-| Method | Endpoint              | Description       |
-| ------ | --------------------- | ----------------- |
-| POST   | `/projects`           | Create project    |
-| GET    | `/projects`           | Get all projects  |
-| GET    | `/projects/:id`       | Get project by ID |
-| POST   | `/projects/:id`       | Update project    |
-| DELETE | `/projects/:id`       | Delete project    |
-| GET    | `/projects/:id/tasks` | Get project tasks |
-
+| Method | Endpoint              | Description       | Hosted On |
+| ------ | --------------------- | ----------------- | --------- |
+| POST   | `/projects`           | Create project    | Render    |
+| GET    | `/projects`           | Get all projects  | Render    |
+| GET    | `/projects/:id`       | Get project by ID | Render    |
+| POST   | `/projects/:id`       | Update project    | Render    |
+| DELETE | `/projects/:id`       | Delete project    | Render    |
+| GET    | `/projects/:id/tasks` | Get project tasks | Render    |
 
 ---
 
 ### 📝 Tasks
 
-| Method | Endpoint     | Description                       |
-| ------ | ------------ | --------------------------------- |
-| POST   | `/tasks`     | Create task                       |
-| GET    | `/tasks`     | Get all tasks (filters & sorting) |
-| GET    | `/tasks/:id` | Get task by ID                    |
-| POST   | `/tasks/:id` | Update task                       |
-| DELETE | `/tasks/:id` | Delete task                       |
-
+| Method | Endpoint     | Description                       | Hosted On |
+| ------ | ------------ | --------------------------------- | --------- |
+| POST   | `/tasks`     | Create task                       | Render    |
+| GET    | `/tasks`     | Get all tasks (filters & sorting) | Render    |
+| GET    | `/tasks/:id` | Get task by ID                    | Render    |
+| POST   | `/tasks/:id` | Update task                       | Render    |
+| DELETE | `/tasks/:id` | Delete task                       | Render    |
 
 ---
 
 ### 📊 Reports
 
-| Method | Endpoint               | Description              |
-| ------ | ---------------------- | ------------------------ |
-| GET    | `/report/last-week`    | Completed last week      |
-| GET    | `/report/pending`      | Pending work summary     |
-| GET    | `/report/closed-tasks` | Closed task distribution |
-
+| Method | Endpoint               | Description              | Hosted On |
+| ------ | ---------------------- | ------------------------ | --------- |
+| GET    | `/report/last-week`    | Completed last week      | Render    |
+| GET    | `/report/pending`      | Pending work summary     | Render    |
+| GET    | `/report/closed-tasks` | Closed task distribution | Render    |
 
 ---
 
 ## 🛠 Tech Stack
 
 ### Backend
-- Node.js  
-- Express.js  
+
+* Node.js
+* Express.js
 
 ### Database
-- MongoDB (Mongoose)
+
+* MongoDB (Mongoose)
 
 ### Authentication & Security
-- JWT (JSON Web Token) Authentication  
-- Email OTP Verification System  
-- Bcrypt Password Hashing  
+
+* JWT (JSON Web Token) Authentication
+* Email OTP Verification System
+* Bcrypt Password Hashing
 
 ### Email & Notifications
-- Nodemailer (Gmail SMTP)
+
+* Nodemailer (Gmail SMTP)
 
 ### Deployment
-- Vercel (Backend Hosting)
+
+* **Render** – Core APIs (tasks, teams, projects, reports, login)
+* **Vercel** – OTP-based email authentication APIs
 
 ---
-
 
 
